@@ -1,36 +1,52 @@
 <?php
 
+use Livewire\Component;
+use Livewire\Attributes\Computed;
+use Livewire\WithPagination;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
-use Livewire\Component;
-use Livewire\WithPagination;
 
-new #[Title('E-commerce Shop')] #[Layout('layouts.app')] class extends Component
+new #[Title('Products')] #[Layout('layouts.app')] class extends Component
 {
     use WithPagination;
 
-    protected string $paginationTheme = 'tailwind';
+    public $category = null;
+
+    public function mount()
+    {
+        $this->category = request()->query('category');
+    }
 
     #[Computed]
     public function products()
     {
         $response = Http::get('https://fakestoreapi.com/products')->json();
 
-        // Convert array to collection
         $collection = collect($response)->map(function ($item) {
             return (object) [
                 'id' => $item['id'],
                 'title' => $item['title'],
                 'price' => $item['price'],
                 'image' => $item['image'],
-                'rating_rate' => $item['rating']['rate'] ?? 0,
+                'category' => $item['category'],
             ];
         });
 
-        // Manual pagination
+        // CATEGORY MAP
+        $map = [
+            'mens' => "men's clothing",
+            'womens' => "women's clothing",
+            'beauty' => "jewelery",
+            'fashion' => "electronics",
+        ];
+
+        // FILTER
+        if ($this->category && isset($map[$this->category])) {
+            $collection = $collection->where('category', $map[$this->category]);
+        }
+
         $perPage = 8;
         $page = $this->page ?? 1;
 
@@ -43,7 +59,7 @@ new #[Title('E-commerce Shop')] #[Layout('layouts.app')] class extends Component
         );
     }
 
-     public function with(): array
+    public function with(): array
     {
         return [
             'products' => $this->products,
@@ -54,7 +70,7 @@ new #[Title('E-commerce Shop')] #[Layout('layouts.app')] class extends Component
 
 <div class="mx-auto p-2 sm:p-6">
     <div class="flex justify-between items-center px-2">
-        <h1 class="text-2xl sm:text-3xl font-bold my-5 px-2">Trading Products</h1>
+        <h1 class="text-2xl sm:text-3xl font-bold my-5 px-2"> {{ ucfirst($category ?? 'Products') }}</h1>
         <!-- Loading Indicator -->
         <div wire:loading class="text-blue-600 animate-pulse text-sm font-medium">
             Updating...

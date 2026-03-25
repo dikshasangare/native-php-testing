@@ -5,39 +5,45 @@
         </div>
         <div class="mx-4 mb-5 bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
             <div class="flex flex-row justify-between items-center">
-                <div class="flex flex-col items-center">
+                <a href="{{ route('products.list', ['category' => 'electronics']) }}" class="flex flex-col items-center">
                     <div class="h-12 w-12 rounded-full bg-gray-50 flex items-center justify-center overflow-hidden border border-gray-100">
                         <img src="{{ asset('images/beauty.jpg') }}" alt="Beauty" class="h-full w-full object-cover"/>
                     </div>
                     <p class="text-[12px] font-medium text-gray-600 mt-2">Beauty</p>
-                </div>
+                </a>
 
-                <div class="flex flex-col items-center">
+                <a href="{{ route('products.list', ['category' => 'jewelery']) }}" class="flex flex-col items-center">
                     <div class="h-12 w-12 rounded-full bg-gray-50 flex items-center justify-center overflow-hidden border border-gray-100">
                         <img src="{{ asset('images/fashion.jpg') }}" alt="Fashion" class="h-full w-full object-cover"/>
                     </div>
                     <p class="text-[12px] font-medium text-gray-600 mt-2">Fashion</p>
-                </div>
+                </a>
 
                 <div class="flex flex-col items-center">
+                     <a href="{{ route('products.list', ['category' => 'kids']) }}">
                     <div class="h-12 w-12 rounded-full bg-gray-50 flex items-center justify-center overflow-hidden border border-gray-100">
                         <img src="{{ asset('images/kids.jpg') }}" alt="Kids" class="h-full w-full object-cover"/>
                     </div>
                     <p class="text-[12px] font-medium text-gray-600 mt-2">Kids</p>
+                     </a>
                 </div>
 
                 <div class="flex flex-col items-center">
+                     <a href="{{ route('products.list', ['category' => 'womens']) }}">
                     <div class="h-12 w-12 rounded-full bg-gray-50 flex items-center justify-center overflow-hidden border border-gray-100">
                         <img src="{{ asset('images/womens.jpg') }}" alt="Womens" class="h-full w-full object-cover"/>
                     </div>
                     <p class="text-[12px] font-medium text-gray-600 mt-2">Womens</p>
+                     </a>
                 </div>
 
                 <div class="flex flex-col items-center">
+                    <a href="{{ route('products.list', ['category' => 'mens']) }}">
                     <div class="h-12 w-12 rounded-full bg-gray-50 flex items-center justify-center overflow-hidden border border-gray-100">
                         <img src="{{ asset('images/mens.jpg') }}" alt="Mens" class="h-full w-full object-cover"/>
                     </div>
                     <p class="text-[12px] font-medium text-gray-600 mt-2">Mens</p>
+                    </a>
                 </div>
 
             </div>

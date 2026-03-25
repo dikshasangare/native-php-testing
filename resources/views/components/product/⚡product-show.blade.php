@@ -149,13 +149,15 @@ new #[Title('E-commerce Shop')] #[Layout('layouts.app')] class extends Component
                                     <p class="text-gray-500 text-[10px] sm:text-xs line-clamp-2 leading-tight min-h-[2.5em]">
                                         {{ $product['description'] }}
                                     </p>
-                                    
-                                    <p class="text-blue-700 font-bold text-sm sm:text-lg mt-2">
-                                        ${{ number_format($product['price'], 2) }}
-                                    </p>
+                                  
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-blue-700 font-bold text-sm sm:text-lg mt-2">${{ number_format($product['price'], 2) }}</span>
+                                        <span class="text-[10px] font-semibold text-gray-400 uppercase tracking-tighter mt-2">{{ $product['category'] }}</span>
+                                    </div>
+
                                 </div>
 
-                                <div class="flex items-center mt-1 mb-3">
+                                <div class="flex items-center mb-3 px-2 sm:px-4">
                                     <div class="flex items-center text-yellow-400">
                                         @for ($i = 1; $i <= 5; $i++)
                                             @if ($i <= $fullStars)
