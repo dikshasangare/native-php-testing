@@ -1,18 +1,22 @@
 <?php
 
+use \App\Models\Wishlist;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Notification as FacadesNotification;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use Native\Mobile\Facades\Notification;
 
 new #[Title('E-commerce Shop')] #[Layout('layouts.app')] class extends Component
 {
-    public int $id; // Automatically injected from the {id} in the route
+    public int $id; 
     public array $product = [];
     public bool $loading = true;
     public bool $expanded = false;
-    public array $similarProducts = []; // <--- MUST HAVE THIS LINE
-   
+    public array $similarProducts = []; 
+    public $isWishlisted = false;
 
     public function mount()
     {
@@ -21,7 +25,20 @@ new #[Title('E-commerce Shop')] #[Layout('layouts.app')] class extends Component
         
           if ($response->successful()) {
             $this->product = $response->json();
-            
+            // ✅ CHECK WISHLIST (USER OR GUEST)
+            $userId = Auth::id() ?? 1;
+            $sessionId = session()->getId();
+
+            $query = Wishlist::where('product_id', $this->id);
+
+            if ($userId) {
+                $query->where('user_id', $userId);
+            } else {
+                $query->where('session_id', $sessionId);
+            }
+
+            $this->isWishlisted = $query->exists();
+
             // 2. Fetch Similar Products using the category from the main product
             $category = $this->product['category'];
             $similarResponse = Http::get("https://fakestoreapi.com/products/category/{$category}");
@@ -42,6 +59,52 @@ new #[Title('E-commerce Shop')] #[Layout('layouts.app')] class extends Component
     {
         $this->expanded = !$this->expanded;
     }
+
+    public function wishlistToggle(): void
+    {
+        $userId = Auth::id() ?? 1;
+        $sessionId = session()->getId();
+
+        $query = Wishlist::where('product_id', $this->id);
+
+        if ($userId) {
+            $query->where('user_id', $userId);
+        } else {
+            $query->where('session_id', $sessionId);
+        }
+
+        $wishlist = $query->first();
+
+        if ($wishlist) {
+            $wishlist->delete();
+            $this->isWishlisted = false;
+             // $this->notify('Removed from wishlist ❌');
+        } else {
+            Wishlist::create([
+                'user_id' => $userId ?? 1,
+                'session_id' => $sessionId,
+                'product_id' => $this->id
+            ]);
+
+            $this->isWishlisted = true;
+            // $this->notify('Added to wishlist ❤️');
+        }
+    }
+
+    // ✅ Unified notification handler
+    // private function notify(string $message): void
+    // {
+    //     // NativePHP Mobile
+    //     if (class_exists(FacadesNotification::class)) {
+    //         FacadesNotification::title('Wishlist')
+    //             ->body($message)
+    //             ->send();
+    //     }
+
+    //     // Web fallback (Livewire event)
+    //     $this->dispatch('toast', message: $message);
+    // }
+
 };
 ?>
 
@@ -113,18 +176,19 @@ new #[Title('E-commerce Shop')] #[Layout('layouts.app')] class extends Component
                         <span class="font-bold text-xs tracking-wide py-2">Add to Cart</span>
                     </button>
 
-                    <button class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-all shadow-lg hover:shadow-blue-200">
+                    <button wire:click="wishlistToggle" class="inline-flex items-center  hover:bg-blue-700  {{ $isWishlisted ? 'bg-red-500' : 'bg-blue-600' }} text-white rounded-full transition-all shadow-lg hover:shadow-blue-200">
                         <div class="bg-white rounded-full p-4 mr-3 shadow-lg">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-blue-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="{{ $isWishlisted ? 'currentColor' : 'none' }}" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"  class="w-5 h-5 {{ $isWishlisted ? 'text-red-500' : 'text-blue-600' }}">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
                             </svg>
                         </div>
-                        <span class="font-bold text-xs tracking-wide py-2">Wishlist</span>
+                        <span class="font-bold text-xs tracking-wide py-2"> {{ $isWishlisted ? 'Wishlisted' : 'Add to Wishlist' }}</span>
                     </button>
+                    
                 </div>
             </div>
 
-           <div class="mt-16 border-t border-gray-100 pt-10">
+            <div class="border-t border-gray-100 pt-2">
                 <h3 class="text-2xl font-extrabold text-gray-900 tracking-tight mb-8">Similar Products</h3>
                 <div class="grid grid-cols-2 gap-2 sm:gap-6">
                     @foreach($similarProducts as $product)
